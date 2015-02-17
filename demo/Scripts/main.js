@@ -390,6 +390,8 @@ var Figure = Base.extend({
 		var onground = false;
 		var t = Math.floor((x + 16 + vx) / 32); //vx 속도만큼의 몹의 그리드 위치
 	
+		
+
 		//-------------------------------------------- x방향으로 움직임
 		if(dx > 0) {
 			d = t - ie;
@@ -402,10 +404,12 @@ var Figure = Base.extend({
 		
 		}
 		
+		//mario는 초기값 vx=0이므로 움직이지 않음, vx(속도x)값으로 움직임 제어
 		x += vx; //vx값만큼 x위치를 더해줌 . 318+(-2),316+(-2)
 		
 		for(var i = 0; i < d; i++) {
-			if(this.collides(t + dx, t + dx, js, je, b)) {
+			if(this.collides(t + dx, t + dx, js, je, b)) {///모든 figure들의 충돌체크
+				console.log('-충돌-');
 				vx = 0;
 				x = t * 32 + 15 * dx;
 				break;
@@ -416,20 +420,8 @@ var Figure = Base.extend({
 			ie += dx;
 			//console.log("t="+t+",,is="+is+",,ie="+ie);
 		}
-		
-		///// move 함수에서 사용하는 모든변수 확인
-		/*
-		console.log("-------------------");
-		console.log("vx="+vx+",,vy="+vy);
-		console.log("dx="+dx+",,dy="+dy);
-		console.log("x(위치값)="+x+",,y(위치값)="+y);
-		console.log("is="+is+",,ie="+ie);
-		console.log("js="+js+",,je="+je);
-		console.log("d="+d+",,b="+b);
-		console.log("t="+t+",,onground="+onground);
-		console.log("-------------------");
-		*/
-		
+
+	
 		//-------------------------------------------- y방향으로 움직임
 		if(dy > 0) {
 			t = Math.ceil(this.level.getGridHeight() - s - (y + 31 + vy) / 32);
@@ -445,20 +437,38 @@ var Figure = Base.extend({
 			d = 0;
 		
 		y += vy;
-		
+	
 		for(var i = 0; i < d; i++) {
 			if(this.collides(is, ie, t - dy, t - dy, b)) {
+				console.log('-충돌-');
 				onground = dy < 0;
 				vy = 0;
 				y = this.level.height - (t + 1) * 32 - (dy > 0 ? (s - 1) * 32 : 0);
+				console.log('this.level.height='+this.level.height);
+				console.log('t='+t);
+				console.log('s='+s);
 				break;
 			}
 			
 			t -= dy;
 		}
+		
+						
+		///// move 함수에서 사용하는 모든변수 확인
+		console.log("vx="+vx+",,vy="+vy);
+		console.log("dx="+dx+",,dy="+dy);
+		console.log("x(위치값)="+x+",,y(위치값)="+y);
+		/*
+		console.log("is="+is+",,ie="+ie);
+		console.log("js="+js+",,je="+je);
+		console.log("d="+d+",,b="+b);
+		*/
+		console.log("t="+t+",,onground="+onground);
+		console.log("-------------------");
+	 
 		//------------------------------------------
 			
-
+		console.log("-----")
 		this.onground = onground;
 		this.setVelocity(vx, vy);
 		this.setPosition(x, y);
@@ -491,13 +501,14 @@ var Enemy = Figure.extend({
 		this.view.show();
 	},
 	move: function() {
-		if(!this.invisible) {
+		if(!this.invisible) {/// 살아있으면
 			this._super();
-		
+			
 			if(this.vx === 0) {
 				var s = this.speed * Math.sign(this.speed);
 				this.setVelocity(this.direction === directions.right ? -s : s, this.vy);
 			}
+			
 		}
 	},
 	collides: function(is, ie, js, je, blocking) {
@@ -657,6 +668,7 @@ var Mario = Hero.extend({
 		}
 	},
 	setPosition: function(x, y) {
+		
 		this._super(x, y);
 		var r = this.level.width - 640;
 		var w = (this.x <= 210) ? 0 : ((this.x >= this.level.width - 230) ? r : r / (this.level.width - 440) * (this.x - 210));		
@@ -664,12 +676,16 @@ var Mario = Hero.extend({
 
 		if(this.onground && this.x >= this.level.width - 128)
 			this.victory();
+		/**/	
 	},
 	input: function(keys) {
 		this.fast = keys.accelerate;
 		this.crouching = keys.down;
 		
-		if(!this.crouching) {
+		/// key.down이 false 일때만 모든동작을 동시에 작동할수 있음
+		// 마리오가 앉아 있을때는 현재 행동만 할수 있음. 다른 행동은 동시에 못함
+		if(!this.crouching) { // keys.down가 false 일때
+			
 			if(this.onground && keys.up)
 				this.jump();
 				
@@ -705,8 +721,10 @@ var Mario = Hero.extend({
 				this.walkRight();
 			else if(this.onground && vx < 0)
 				this.walkLeft();
-			else
+			else{
 				this.stand();
+				console.log('mario stand');
+			}	
 		}
 	
 		this._super(vx, vy);
@@ -758,6 +776,7 @@ var Mario = Hero.extend({
 	},
 	stand: function() {
 		var coords = this.standSprites[this.state - 1][this.direction === directions.left ? 0 : 1][this.onground ? 0 : 1];
+		//console.log("coords.x, coords.y==",+coords.x+", "+coords.y);
 		this.setImage(images.sprites, coords.x, coords.y);
 		this.clearFrames();
 	},
@@ -771,7 +790,8 @@ var Mario = Hero.extend({
 		this.vy = constants.jumping_v;
 	},
 	move: function() {
-		this.input(keys);		
+		//console.log('mario move --------');
+		this.input(keys);
 		this._super();
 	},
 	addCoin: function() {
@@ -885,7 +905,7 @@ var Level = Base.extend({
 		}
 			
 		this.setPosition(0, 0);
-		//this.setSize(level.width * 32, level.height * 32);
+		this.setSize(level.width * 32, level.height * 32);
 		//this.setImage(level.background);
 		this.raw = level;
 		this.id = level.id;
@@ -933,10 +953,10 @@ var Level = Base.extend({
 			//console.log("i="+i);
 			figure = this.figures[i];							
 			if(figure instanceof Mario) { ///마리오와 같다면
-				console.log("figure"+i+"=Mario");
+				//console.log("figure"+i+"=Mario");
 			}
 			if(figure instanceof Gumpa){
-				console.log("figure"+i+"=Gumpa");
+				//console.log("figure"+i+"=Gumpa");
 			}	
 			
 			if(figure.dead) {
@@ -975,7 +995,7 @@ var Level = Base.extend({
 				figure.move();
 				figure.playFrame();
 			}
-			console.log("----------------figure loop exit----------------");
+			//console.log("----------------figure loop exit----------------");
 		}
 		/**/
 		for(i = this.items.length; i--; )
@@ -984,8 +1004,6 @@ var Level = Base.extend({
 		this.coinGauge.playFrame();
 		this.liveGauge.playFrame();
 		
-		
-			console.log("----------------tick exit----------------");
 	},
 	start: function() {
 		var me = this;
@@ -995,8 +1013,9 @@ var Level = Base.extend({
 		}, constants.interval);
 		*/
 		var j=30;
-		for(j = 3; j--; ) {
+		for(j = 2; j--; ) {
 			me.tick.apply(me);
+			console.log("----------------["+j+"]tick exit----------------");
 		}
 		
 	},
@@ -1047,4 +1066,5 @@ $(document).ready(function() {
 	var level = new Level('world');
 	level.load(definedLevels[0]);
 	level.start();
+	keys.bind();
 });

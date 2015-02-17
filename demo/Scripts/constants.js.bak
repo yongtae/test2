@@ -93,7 +93,7 @@ var q2q = function(figure, opponent) {
 		if(opponent instanceof Gumpa){
 			console.log("opponent"+j+"=Gumpa");
 		}	
-		console.log("figure.x="+figure.x+",,opponent="+opponent.x);
+		console.log("figure.x="+figure.x+",,opponent.x="+opponent.x);
 	console.log("---------------------");
 		/**/
 	//figure가 mario 가정, opponent=gumpa 가정, 서로 위치를 체크해서 hit을 호출함, 

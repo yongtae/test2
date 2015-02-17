@@ -87,6 +87,7 @@ var c2u = function(s) {
 var q2q = function(figure, opponent) {
 	var j=0;
 
+		/*
 		if(opponent instanceof Mario) { ///마리오와 같다면
 			console.log("opponent"+j+"=Mario");
 		}
@@ -95,7 +96,7 @@ var q2q = function(figure, opponent) {
 		}	
 		console.log("figure.x="+figure.x+",,opponent.x="+opponent.x);
 	console.log("---------------------");
-		/**/
+		*/
 	//figure가 mario 가정, opponent=gumpa 가정, 서로 위치를 체크해서 hit을 호출함, 
 	//이미지가 with=32이므로 16(절반)에 못미치게 겹치면 hit 하지 않음	
 	if(figure.x > opponent.x + 16) //mario가 gump보다 이미지의(16)의 위치를 넘어가면 칠필요없음
